@@ -1,0 +1,143 @@
+# ============================================================
+# Multimodal Misinformation Detector — Python Dependencies
+# ============================================================
+# Install all: pip install -r requirements.txt
+# GPU install: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# then: pip install -r requirements.txt
+# ============================================================
+
+# ── Deep Learning ────────────────────────────────────────────
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0         # optional, pulled in by torch ecosystem
+
+# ── NLP / Transformers ───────────────────────────────────────
+transformers>=4.35.0
+sentencepiece>=0.1.99     # required for XLM-RoBERTa tokenizer
+protobuf>=3.20.0
+accelerate>=0.24.0        # mixed precision, multi-GPU
+
+# ── High-accuracy model backbone ─────────────────────────────
+timm>=0.9.10              # EfficientNet-B4, ConvNeXt, ViT backbones
+
+# ── Face Detection ───────────────────────────────────────────
+facenet-pytorch>=2.5.3    # MTCNN — much higher face detection recall than Haar
+
+# ── Computer Vision ──────────────────────────────────────────
+opencv-python-headless>=4.8.0
+Pillow>=10.1.0
+
+# ── Dataset loading ──────────────────────────────────────────
+datasets>=2.14.0          # HuggingFace datasets (LIAR, etc.)
+
+# ── Data Processing ──────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.11.0             # temporal smoothing, DCT, statistics
+
+# ── Augmentation ─────────────────────────────────────────────
+albumentations>=1.3.0     # advanced image augmentation
+
+# ── Progress Bars ────────────────────────────────────────────
+tqdm>=4.66.0
+
+# ── API Server ───────────────────────────────────────────────
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.4.0
+
+# ── Caching ──────────────────────────────────────────────────
+redis>=5.0.0              # prediction caching (set REDIS_URL env var)
+
+# ── Rate Limiting ────────────────────────────────────────────
+slowapi>=0.1.9            # per-IP rate limiting for FastAPI
+
+# ── Monitoring ───────────────────────────────────────────────
+prometheus-fastapi-instrumentator>=2.3.0   # /metrics endpoint
+
+# ── Explainability ───────────────────────────────────────────
+shap>=0.44.0              # token-level explanations for text model
+
+# ── Calibration ──────────────────────────────────────────────
+# netcal>=1.3.4           # optional: ECE / reliability diagrams
+
+# ── Article Scraping ─────────────────────────────────────────
+newspaper3k>=0.2.8        # /api/analyze-url endpoint
+
+# ── ONNX Export / Serving ────────────────────────────────────
+onnx>=1.15.0              # model export
+onnxruntime>=1.16.0       # CPU inference (use onnxruntime-gpu for GPU)
+
+# ── Back-translation Augmentation ────────────────────────────
+# Helsinki-NLP/opus-mt-* models are downloaded automatically via transformers
+# No extra pip install needed — just run augment_minority_class() in training
+
+# ============================================================
+# DATASET DOWNLOAD GUIDE
+# ============================================================
+#
+# TEXT (FAKE NEWS) DATASETS:
+#
+#  1. LIAR (English, 12.8k)
+#     → Auto-downloaded via: load_dataset("ucsbnlp/liar")
+#
+#  2. WELFake (English, 72k) — BEST for English accuracy
+#     → pip install kaggle
+#     → kaggle datasets download -d saurabhshahane/fake-news-classification
+#     → Rename to WELFake_Dataset.csv and place in project root
+#
+#  3. ISOT (English, 44k)
+#     → https://onlineacademiccommunity.uvic.ca/isot/ (free form)
+#     → Extracts as True.csv + Fake.csv
+#
+#  4. BanFakeNews (Bengali, 8.5k)
+#     → git clone https://github.com/Rowan1697/BanFakeNews
+#     → Place CSV as BanFakeNews.csv
+#
+#  5. Hindi Fake News
+#     → git clone https://github.com/sumanthvrao/Fake-News-Hindi
+#     → Place CSV as hindi_fake_news.csv
+#
+#  6. IndicFakeNews (AI4Bharat, multilingual)
+#     → https://indicnlp.ai4bharat.org/
+#     → Place CSV as indicfakenews.csv
+#
+# VIDEO (DEEPFAKE) DATASETS:
+#
+#  1. FaceForensics++ (recommended, 1000 videos × 5 manipulation types)
+#     → https://github.com/ondyari/FaceForensics (request access via form)
+#     → Extract face crops: python extract_faces.py --data_dir ./FF++
+#
+#  2. Celeb-DF v2 (590 real + 5639 fake)
+#     → https://github.com/yuezunli/celeb-deepfakeforensics
+#
+#  3. DFDC — Facebook Deepfake Detection Challenge (100k+ clips)
+#     → Kaggle mirror: kaggle competitions download -c deepfake-detection-challenge
+#
+#  4. UADFV (small, 49+49, good for quick prototyping)
+#     → https://github.com/danmohaha/WIFS2018_In_Ictu_Oculi
+#
+# ORGANIZING DEEPFAKE DATA:
+#   dataset/
+#     real/        <- .jpg face crops from real videos
+#     deepfake/    <- .jpg face crops from fake/manipulated videos
+#   Then: python train_deepfake_detector.py --data_dir ./dataset --epochs 30
+#
+# ============================================================
+# QUICK START
+# ============================================================
+#
+#  Development (synthetic data, fast):
+#    python train_fake_news_detector.py --model xlm-roberta-base --generate_data --epochs 3
+#    python train_deepfake_detector.py --generate_data --epochs 5
+#    uvicorn inference_api:app --reload
+#
+#  Full training (real data, best accuracy):
+#    python train_fake_news_detector.py --model xlm-roberta-large --dataset combined --epochs 10 --calibrate
+#    python train_deepfake_detector.py --data_dir ./dataset --epochs 30 --train_autoencoder --export_onnx
+#    uvicorn inference_api:app --host 0.0.0.0 --port 8000 --workers 2
+#
+# ============================================================
+  
